@@ -1,0 +1,33 @@
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>The Filth</title>
+        <script src="filthGenerator.js"></script>
+    </head>
+
+    <style>
+        table { 
+            border-spacing: 0;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .cell { width: 20px; height: 20px; }
+        
+        td {
+            border: 1px black solid;
+        }
+    </style>
+
+    <body>
+        <p>
+            <div id="daysOff"></div>
+        </p>
+        <table id="filthy" width = "100%"></table>
+        <script type="text/Javascript">
+            display_DOPs();
+            makeTable();
+        </script>
+
+    </body>
+</html>

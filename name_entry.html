@@ -1,0 +1,81 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Filth Roster Generator</title>
+        <script src="filthGenerator.js"></script>
+    </head>
+    <style>
+        #entries, #results {float: left;}
+    </style>
+
+
+
+    <body>
+
+        <div id="entries"></div>
+        <!--division info for male names-->
+        <div id="newName" style="display:none">
+            <div class="maleNames">
+                <input type="text" name="feedName[]" value=""  size="50">
+            </div>
+        </div>
+
+        <!--division info for female names-->
+        <div id="newName2" style="display:none">
+            <div class="femNames">
+                <input type="text" name="feedName1[]" value=""  size="50">
+            </div>
+        </div>
+        
+        <!--start of the form -->
+        <form id = "regForm" action="DOP_entry.html">
+            <h3>Enter the names of everyone on male and fem staff (one name per line)</h3>
+            <!--text button to add new row for a male name (calls the add_new function)-->
+            <p id="addnew">
+                <a href="javascript:add_feed(1)">Add New Male Name</a>
+            </p>
+
+            <!--table for male staff names-->
+            <table>
+            <tr>
+                <td valign=top> Enter male staff names (click 'add new' for each new name):</td>
+                <td valign=top>
+                    <div id="newName1">
+                        <div class="maleNames">
+                            <input type="text" name="feedName[]" value="" size="50" id="males">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </table>
+
+            <br>
+
+            <!--text button to add new row for a female name-->
+            <p id="addnew1">
+                <a href="javascript:add_feed(2)">Add New Female Name</a>
+            </p>
+
+            <!--table for female staff names-->
+            <table>
+            <tr>
+                <td valign=top> Enter female staff names (click 'add new' for each new name):</td>
+                <td valign=top>
+                    <div id="newName3">
+                        <div class="femNames">
+                            <input type="text" name="feedName1[]" value="" size="50" id="fems">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </table>
+            <p>
+                <button type="button" onclick="validate(this.form)">Test me!</button>
+                <input type="submit" value="Submit" onclick="validate(this.form)">
+            </p>
+
+        </form>
+        <div id="results"></div>
+
+    </body>
+</html>
