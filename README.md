@@ -7,4 +7,4 @@ This program is written in HTML and javascript, and it is my first ever Javascri
 The user enters the names of staff members, and then enters their days off. The program uses this info to generate a table (a "filth roster") with all duties for each day filled out.
 
 Here is an example of an old filth roster (created without this program), to give an idea of what the final product of this program will look like.
-<img src="Desktop/filthImage.png"
+<img src="Desktop/filthImage.png">
