@@ -1,6 +1,6 @@
 # filth-maker
 
-Previously, the assistant director of Nature Camp had to spend many hours creating the duty sheet, or "filth roster," by hand. Creating the filth roster took several hours, and often contained various errors that had to be corrected later. This program will create the filth automatically, hopefully saving the assistant director many hours of work.
+Previously, the assistant director of Nature Camp had to spend many hours creating the duty sheet, or "filth roster," by hand. Creating the filth roster took several hours, and often contained various errors that had to be corrected later. This program will create the filth automatically, hopefully saving the assistant director many hours of work. As of 01/18/20, the program is about 80% complete.
 
 This program is written in HTML and javascript, and it is my first ever Javascript/HTML program. As time goes on and I learn more about HTML and JS, I hope to tweek and improve the program.
 
