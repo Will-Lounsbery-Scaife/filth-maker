@@ -13,35 +13,35 @@
     <body>
 
         <div id="entries"></div>
-        <!--division info for male names-->
+        <!--division info for bbh staff names-->
         <div id="newName" style="display:none">
-            <div class="maleNames">
+            <div class="bbhNames">
                 <input type="text" name="feedName[]" value=""  size="50">
             </div>
         </div>
 
-        <!--division info for female names-->
+        <!--division info for GBH staff names-->
         <div id="newName2" style="display:none">
-            <div class="femNames">
+            <div class="gbhNames">
                 <input type="text" name="feedName1[]" value=""  size="50">
             </div>
         </div>
         
         <!--start of the form -->
         <form id = "regForm" action="DOP_entry.html">
-            <h3>Enter the names of everyone on male and fem staff (one name per line)</h3>
-            <!--text button to add new row for a male name (calls the add_new function)-->
+            <h3>Enter the names of everyone on staff who will be dutied (enter one name, then press "add new name")</h3>
+            <!--text button to add new row for a bbh name (calls the add_new function)-->
             <p id="addnew">
-                <a href="javascript:add_feed(1)">Add New Male Name</a>
+                <a href="javascript:add_feed(1)">Add new BBH counselor name</a>
             </p>
 
-            <!--table for male staff names-->
+            <!--table for bbh staff names-->
             <table>
             <tr>
-                <td valign=top> Enter male staff names (click 'add new' for each new name):</td>
+                <td valign=top> Enter BBH staff names (click 'add new' for each new name):</td>
                 <td valign=top>
                     <div id="newName1">
-                        <div class="maleNames">
+                        <div class="bbhNames">
                             <input type="text" name="feedName[]" value="" size="50" id="males">
                         </div>
                     </div>
@@ -51,18 +51,18 @@
 
             <br>
 
-            <!--text button to add new row for a female name-->
+            <!--text button to add new row for a GBH counselor name-->
             <p id="addnew1">
-                <a href="javascript:add_feed(2)">Add New Female Name</a>
+                <a href="javascript:add_feed(2)">Add new GBH counselor name</a>
             </p>
 
-            <!--table for female staff names-->
+            <!--table for GBH staff names-->
             <table>
             <tr>
-                <td valign=top> Enter female staff names (click 'add new' for each new name):</td>
+                <td valign=top> Enter GBH staff names (click 'add new' for each new name):</td>
                 <td valign=top>
                     <div id="newName3">
-                        <div class="femNames">
+                        <div class="gbhNames">
                             <input type="text" name="feedName1[]" value="" size="50" id="fems">
                         </div>
                     </div>

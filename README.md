@@ -8,3 +8,12 @@ The user enters the names of staff members, and then enters their days off. The 
 
 Here is an example of an old filth roster (created without this program), to give an idea of what the final product of this program will look like.
 ![](Images/filthImage.png)
+
+Things to note:
+-Extra kitchens (once everyone has two kitchen) are random; the program does not favor giving an extra kitchen to people who have it on non-full days. Might be worth it for the AD to fix this manually after running the program.
+-Kitchen is the only duty that is tracked to make sure people don't get it many times
+-If you want a staff member to be a cook for a certain day, just add them to the DOP that day and they won't be dutied
+
+To run this code:
+-Open a web browser (I chrome and all testing and troubleshooting was done on Chrome)
+-File --> Open file --> click on name_entry.html (wherever it is stored on your computer)

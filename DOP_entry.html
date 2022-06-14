@@ -16,7 +16,6 @@
             
             <div id="showDOP"></div>
             <div>DOPs:</div>
-            <div id="showDOP1"></div>
             
         </p>
 
@@ -160,8 +159,15 @@
             </script>
             <br><br>
         
-            
-            <button type="button" onclick="generate_DOPs()">Show me DOPs</button>
+            <p> Who are the lifeguards for this session? Ctrl click to add multiple (cmd click on mac)</p>
+            <select  id="lifeguardform" class="selectlifeguards" multiple size=25>
+
+            </select>
+            <script type="text/javascript">
+                addOption("lifeguardform");
+            </script>
+            <br><br>
+
             <input type="submit" onclick="generate_DOPs()">
             
 
