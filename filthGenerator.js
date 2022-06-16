@@ -1,7 +1,8 @@
 // TODO: 
-// 
-// figure out "gendered" duties
-// figure out the purpose of old functions and add comments to them
+// figure out the male/fem/neutral situation with BBH/GBH duties, and maybe make it so head counselors always have bunkhouse on the first day of the session
+// once the bunkhouse duties are implemented, tie the grace duties to those duties
+// make it so that staff members will not be assigned the same duty an excessive number of times, or multiple days in a row
+// implement an option for second session, which will change the duties given on the 4th of July to reflect the schedule for that day 
 
 
 // Global variables
@@ -70,14 +71,19 @@ class StaffMember {
 class Day {
     // name of day 
     dayID;
+
     // number of day in the session
     dayNumber;
+
     // array of staff members who are at the DOP on this day
     DOPs;
+
     // array of staff members not at the DOP this day
     nonDOPs = [];
+
     // array of staff members to be pulled from for duties (starts the same as nonDOPs)
     pull_pool;
+
     // staff members assigned to a duty this day (duties with multiple assignees are arrays)
     bbh;
     gbh;
@@ -89,8 +95,6 @@ class Day {
     rb;
     rg;
     ts;
-    // unsure what this is for
-    slots;
     
     constructor(dopArray, sessionDay, numb) {
         this.dayID = sessionDay;
@@ -131,7 +135,7 @@ class Day {
                 }   
             }
         }
-        this.pull_pool = this.nonDOPs;  
+        this.pull_pool = this.nonDOPs;
     }
 }
 
@@ -169,13 +173,10 @@ function makeTable () {
     staffArrayObj = [];
 
     lg_str = window.localStorage.getItem('lifeguardStorage');
-    //console.log(lg_str);
     lg_arr = lg_str.split(',');
-    //console.log(lg_arr);
-    //console.log("length: " + lg_arr.length);
 
-    document.getElementById('LG').innerHTML += "Lifeguards:  ";
-    document.getElementById('LG').innerHTML += lg_arr;
+    //document.getElementById('LG').innerHTML += "Lifeguards:  ";
+    //document.getElementById('LG').innerHTML += lg_arr;
 
     staffArray0 = window.localStorage.getItem("array_of_staff_names");
     staffArrayObj0 = window.localStorage.getItem("array_of_staff");
@@ -197,6 +198,10 @@ function makeTable () {
     // creates an array of strings from the string of comma separated names
     staffArray = staffArray0.split(',');
 
+    document.getElementById("testMe").innerHTML += "Remember not to grab creamer if the power is out :)";
+    document.getElementById("testMe").style.fontSize = "larger";
+    document.getElementById("testMe").style.fontWeight = "900";
+    /*
     for (let i = 0; i < staffArray.length; i++) {
         if (i == staffArray.length - 1) {
             document.getElementById("testMe").innerHTML += staffArrayObj[i].name;
@@ -205,22 +210,23 @@ function makeTable () {
             document.getElementById("testMe").innerHTML += staffArrayObj[i].name + ", ";
         }
     }
+    */
 
     // variables to determine number of rows and columns
-    var rows = 29;
+    var rows = 35;
     var cols = 15;
     // sets the id of each cell of the table to a coordinate value: (a-z), (0-14)
     var myTable = document.getElementById('filthy');
     // sets the id of each cell to its corresponding coordinate
-    for (let r = 0; r<rows; r++){
+    for (let r = 0; r < rows; r++){
         var row = myTable.insertRow(-1);
-        for (let c = 0; c<cols; c++){
+        for (let c = 0; c < cols; c++){
             var cell = row.insertCell(-1);
-            var coordinates = c + ", " + 'abcdefghijklmnopqrstuvwxyz123'.charAt(r);
+            var coordinates = c + ", " + 'abcdefghijklmnopqrstuvwxyz123456789'.charAt(r);
             cell.setAttribute('id', coordinates);
             cell.setAttribute('class', 'cell');       
             // prints coordinates in each cell for testing
-            document.getElementById(coordinates).innerHTML = coordinates;
+            //document.getElementById(coordinates).innerHTML = coordinates;
         }
     }
     // puts text in the "static" data cells
@@ -229,6 +235,22 @@ function makeTable () {
         var curCell = allCells[i].id
         var str;
         switch (curCell) {
+            case "1, e": case "1, f": case "1, g": case "1, h": case "1, i": case "1, j": case "1, k":
+            case "1, l": case "1, m": case "1, r": case "1, t": case "1, u": case "1, v": case "1, w":
+            case "1, x": case "1, y": case "1, z": case "1, 1": case "1, 2": case "1, 3": case "1, 4":
+            case "1, 4": case "1, 5": case "1, 6": case "1, 7": case "1, 8": case "1, 9": case "8, 9":
+            case "8, e": case "8, f": case "8, g": case "8, h": case "8, i": case "8, j": case "8, k":
+            case "8, l": case "8, m": case "8, r": case "8, t": case "8, s": case "8, v": case "8, w":
+            case "8, x": case "8, y": case "8, z": case "8, 1": case "8, 2": case "8, 3": case "8, 4":
+            case "8, 5": case "8, 6": case "8, 7": case "8, 8": case "13, g": case "14, e": case "14, f":
+            case "13, h": case "13, i": case "13, j": case "13, k": case "13, 4": case "13, 5": case "13, 6":
+            case "13, 7": case "13, 8": case "13, 9": case "14, 4": case "14, 5": case "14, 6": case "14, 7":
+            case "14, 8": case "14, 9": case "14, 3": case "14, 2": case "14, 1": case "14, z": case "14, y":
+            case "14, x": case "14, w": case "14, g": case "14, h": case "14, i": case "14, j": case "14, k":
+            case "14, l": case "14, m": case "14, r": case "14, s": case "14, t":
+            case "13, w": case "13, x": case "13, y": case "13, z": case "13, 1": case "13, 2": case "13, 3":
+                document.getElementById(curCell).style.backgroundColor = "grey";
+                break;
             case "0, a":
                 str = "FILTH";
                 document.getElementById(curCell).innerHTML = str;
@@ -276,9 +298,13 @@ function makeTable () {
             case "0, v":
                 document.getElementById(curCell).innerHTML = "DOP";
                 break;
+            case "0, 4":
+                document.getElementById(curCell).innerHTML = "Undutied";
+                break;
             case "1, a":
                 document.getElementById(curCell).innerHTML = "Sunday";
                 break;
+            /*
             case "0, d": case "0, j": case "0, k": case "0, m": case "0, o": case "0, p": case "0, w": 
             case "0, x": case "0, y": case "0, z": case "1, c": case "1, d": case "1, b": case "2, b": 
             case "3, b": case "4, b": case "5, b": case "6, b": case "7, b": case "8, b": case "9, b": 
@@ -305,9 +331,17 @@ function makeTable () {
             case "12, 2": case "12, 3": case "13, w": case "13, x": case "13, y": case "13, z": case "13, 1": 
             case "13, 2": case "13, 3": case "12, x": case "11, x": case "4, x": case "5, x": case "6, x":
             case "7, x": case "8, x": case "9, x": case "10, x": case "14, w": case "14, x": case "14, y": 
-            case "14, z": case "14, 1": case "14, 2": case "14, 3":
+            case "14, z": case "14, 1": case "14, 2": case "14, 3": case "8, q": case "2, e": case "3, e":
+            case "4, e": case "5, e": case "6, e": case "7, e": case "9, e": case "10, e": case "11, e":
+            case "12, e": case "13, e": case "2, f": case "3, f": case "4, f": case "5, f": case "6, f":
+            case "7, f": case "9, f": case "10, f": case "11, f": case "2, r": case "3, r": case "4, r":
+            case "5, r": case "6, r": case "7, r": case "9, r": case "10, r": case "11, r": case "12, r":
+            case "13, r": case "2, s": case "3, s": case "4, s": case "5, s": case "6, s": case "7, s":
+            case "9, s": case "10, s": case "11, s": case "12, s": case "13, s": case "8, s": case "8, t":
+            case "12, f": case "13, f":
                 document.getElementById(curCell).innerHTML = "";
                 break;
+            */
             case "2, a":
                 document.getElementById(curCell).innerHTML = "Monday";
                 break;
@@ -386,6 +420,7 @@ function generate_DOPs() {
 
     // collection of all the multiple select inputs asking for DOPs of each day
     let inputElements_DOPs = document.getElementsByClassName("selectDOP");
+    
 
     // HTMLCOllection to store the strings of staff names for each Day's DOPs
     let collectionStringDOPs;
@@ -448,15 +483,30 @@ function display_DOPs() {
     
     // loops through each day and calls the fillDOP function on each
     for (let i = 0; i < dayArray2.length; i++) {
-        document.getElementById("days_off").innerHTML += dayArray2[i].dayID + ": ";
+        //document.getElementById("days_off").innerHTML += dayArray2[i].dayID + ": ";
         fillDOP(dayArray2[i]);
         
+        /*
         for (let k = 0; k < dayArray2[i].DOPs.length; k++) {
             document.getElementById("days_off").innerHTML += dayArray2[i].DOPs[k].name + ", ";
         }
         document.getElementById("days_off").innerHTML += "<br>";
+        */
     }
 
+}
+
+// sets the lifeguard booleans of all staff members in each day's pull pool
+function set_lifeguard_bools() {
+    for (let i = 0; i < dayArray2.length; i++) {
+        for (let x = 0; x < dayArray2[i].pull_pool.length; x++) {
+            for (let n = 0; n < staff_lg_array.length; n++) {
+                if (staff_lg_array[n].name == dayArray2[i].pull_pool[x].name) {
+                    dayArray2[i].pull_pool[x].lifeguard = 1;
+                }
+            }
+        }
+    }
 }
 
 
@@ -465,11 +515,11 @@ function fillDOP(myDay) {
     
     // string that corresponds to the day's column in the table 
     let stringDayId = myDay.dayNumber + 1;
-    document.getElementById(stringDayId + ", v").innerHTML = "test";
+    //document.getElementById(stringDayId + ", v").innerHTML = "test";
     
     // leave cells blank if the day has no DOPs
     if (myDay.DOPs.length == 0) {
-        document.getElementById(stringDayId + ", v").innerHTML = "";
+        //document.getElementById(stringDayId + ", v").innerHTML = "";
     }
 
     // loops through the DOPs for the day and adds them to the correct cell
@@ -565,6 +615,7 @@ function addOption(selectId) {
 
 
 // stores the names input in name_entry.html in arrays
+// only works on chrome as of 6/15/2022
 function validate(frm) {
     let ele = frm.elements['feedName[]'];
     let eleList = [];
@@ -633,6 +684,7 @@ function fill_kitchens() {
     let kitchen = new Duty("kitchen");
     let localStaffArray = staffArrayObj;
 
+    
     // loops through each day of the session and calls fill_kitchen
     for (let i = 0; i < 14; i++) {
         
@@ -640,13 +692,13 @@ function fill_kitchens() {
             fill_kitchen(dayArray2[i]);
         }
         catch(error) {
-            console.log("error catch! " + i);
+            console.log("error catch! " + dayArray2[i].dayID);
             recent_kitchens = [];
             fill_kitchen(dayArray2[i]);
         }
         
     }
-
+    
 }
 
 // function to fill the kitchen duty with three staff members for the given date
@@ -706,7 +758,6 @@ function fill_kitchen(date) {
     // removes the random staff member from lazies
     lazies0.splice(rand, 1)[0].name;
 
-
     // repeats above process
     rand = getRandomInt(0, lazies0.length - 1);
     workers.push(lazies0[rand]);
@@ -728,6 +779,7 @@ function fill_kitchen(date) {
         }
     }
 
+
     // sets the pull pool for the date to the modified lazies array
     date.pull_pool = lazies_copy;
     // sets the given dates kit property to the array of staff members added to workers
@@ -735,22 +787,30 @@ function fill_kitchen(date) {
     // string representing given day's dayNum, corrected for position on filth table
     let str_day_number = date.dayNumber + 1;
 
+    document.getElementById("0, n").style.backgroundColor = "lightgrey";
+    document.getElementById("0, o").style.backgroundColor = "lightgrey";
+    document.getElementById("0, p").style.backgroundColor = "lightgrey";
+
     // adds the staff members assigned to kitchen for the given day to the filth table
     for (let i = 0; i < 3; i++) {
         if (i == 0) {
             document.getElementById(str_day_number + ", n").innerHTML = workers[i].name;
+            document.getElementById(str_day_number + ", n").style.backgroundColor = "lightgrey";
         }
         else if (i == 1) {
             document.getElementById(str_day_number + ", o").innerHTML = workers[i].name;
+            document.getElementById(str_day_number + ", o").style.backgroundColor = "lightgrey";
         }
         else if (i == 2) {
             document.getElementById(str_day_number + ", p").innerHTML = workers[i].name;
+            document.getElementById(str_day_number + ", p").style.backgroundColor = "lightgrey";
         }
     }
 }
 
 // loops through each session day and calls fill_rec
 function fill_recs() {
+    
     for (let i = 0; i < 14; i++) {
         if (i == 0 || i == 7 || i == 12 || i == 13) {
             continue;
@@ -759,6 +819,8 @@ function fill_recs() {
             fill_rec(dayArray2[i]);
         }
     }
+
+
 }
 
 // function to fill the rec duty for a given session day
@@ -769,6 +831,7 @@ function fill_rec(date) {
     for (let x = 0; x < date.pull_pool.length; x++) {
         lazies.push(date.pull_pool[x])
     }
+
 
     let rec_workers = [];
 
@@ -797,16 +860,23 @@ function fill_rec(date) {
     // string representing given day's dayNum, corrected for position on filth table
     let str_day_number = date.dayNumber + 1;
 
+    document.getElementById("0, i").style.backgroundColor = "lightgrey";
+    document.getElementById("0, j").style.backgroundColor = "lightgrey";
+    document.getElementById("0, k").style.backgroundColor = "lightgrey";
+
     // adds the staff members assigned to kitchen for the given day to the filth table
-    for (let i = 0; i < 3; i++) {
-        if (i == 0) {
-            document.getElementById(str_day_number + ", i").innerHTML = rec_workers[i].name;
+    for (let x = 0; x < 3; x++) {
+        if (x == 0) {
+            document.getElementById(str_day_number + ", i").innerHTML = rec_workers[x].name;
+            document.getElementById(str_day_number + ", i").style.backgroundColor = "lightgrey";
         }
-        else if (i == 1) {
-            document.getElementById(str_day_number + ", j").innerHTML = rec_workers[i].name;
+        else if (x == 1) {
+            document.getElementById(str_day_number + ", j").innerHTML = rec_workers[x].name;
+            document.getElementById(str_day_number + ", j").style.backgroundColor = "lightgrey";
         }
-        else if (i == 2) {
-            document.getElementById(str_day_number + ", k").innerHTML = rec_workers[i].name;
+        else if (x == 2) {
+            document.getElementById(str_day_number + ", k").innerHTML = rec_workers[x].name;
+            document.getElementById(str_day_number + ", k").style.backgroundColor = "lightgrey";
         }
     }
 
@@ -820,7 +890,14 @@ function fill_labs() {
             continue;
         }
         else {
-            fill_lab(dayArray2[i]);
+            try {
+                fill_lab(dayArray2[i]);
+            }
+            catch (error) {
+                console.log(dayArray2[i].dayID + " can't fill lab: everyone is dutied!");
+                document.getElementById(i + 1 + ", g").innerHTML = "double up!";
+                document.getElementById(str_day_number + ", g").style.backgroundColor = "lightgrey";
+            }
         }
     }
 }
@@ -840,14 +917,22 @@ function fill_lab(date) {
     lazies.splice(rand, 1)[0].name;
 
     // sets the pull pool for the date to the modified lazies array
-    date.pull_pool = lazies;
+    //date.pull_pool = lazies;
+    date.pull_pool = [];
+    for (let x = 0; x < lazies.length; x++) {
+        date.pull_pool.push(lazies[x]);
+    }
+
     // sets the given dates kit property to the array of staff members added to workers
     date.lab = lab_worker;
     // string representing given day's dayNum, corrected for position on filth table
     let str_day_number = date.dayNumber + 1;
 
+    document.getElementById("0, g").style.backgroundColor = "lightgrey";
+
     // fills in the lab duty on the table for the given date
     document.getElementById(str_day_number + ", g").innerHTML = lab_worker.name;
+    document.getElementById(str_day_number + ", g").style.backgroundColor = "lightgrey";
 }
 
 // loops through each session day and calls fill_lib on the given day
@@ -857,7 +942,13 @@ function fill_libs() {
             continue;
         }
         else {
-            fill_lib(dayArray2[i]);
+            try {
+                fill_lib(dayArray2[i]);
+            }
+            catch (error) {
+                console.log(dayArray2[i].dayID + " can't fill library: everyone is dutied!");
+                document.getElementById(i + 1 + ", h").innerHTML = "double up!";
+            }
         }
     }
 }
@@ -869,6 +960,7 @@ function fill_lib(date) {
     for (let x = 0; x < date.pull_pool.length; x++) {
         lazies.push(date.pull_pool[x])
     }
+
 
     // adds random staff member to rec_workers
     rand = getRandomInt(0, lazies.length - 1);
@@ -889,12 +981,18 @@ function fill_lib(date) {
 
 // loops through each session day and calls fill_tablesetter on the each day
 function fill_tablesetters() {
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 13; i++) {
         if (i == 7) {
             continue;
         }
         else {
-            fill_tablesetter(dayArray2[i]);
+            try {
+                fill_tablesetter(dayArray2[i]);
+            }
+            catch (error) {
+                console.log(dayArray2[i].dayID + " can't fill tablesetters: everyone is dutied!");
+                document.getElementById(i + 1 + ", q").innerHTML = "double up!";
+            }
         }
     }
 }
@@ -931,7 +1029,13 @@ function fill_rangerGs() {
             continue;
         }
         else {
-            fill_rangerG(dayArray2[i]);
+            try {
+                fill_rangerG(dayArray2[i]);
+            }
+            catch (error) {
+                console.log(dayArray2[i].dayID + " can't fill ranger G: everyone is dutied!");
+                document.getElementById(i + 1 + ", t").innerHTML = "double up!";
+            }
         }
     }
 }
@@ -964,7 +1068,14 @@ function fill_rangerG(date) {
 // loops through each session day and calls fill_rangerB() on the each day
 function fill_rangerBs() {
     for (let i = 1; i < 14; i++) {
-        fill_rangerB(dayArray2[i]);
+        try {
+            fill_rangerB(dayArray2[i]);
+        }
+        catch (error) {
+            console.log(dayArray2[i].dayID + " can't fill ranger B: everyone is dutied!");
+            document.getElementById(i + 1 + ", u").innerHTML = "double up!";
+            document.getElementById(i + 1 + ", u").style.backgroundColor = "lightgrey";
+        }
     }
 }
 
@@ -989,12 +1100,16 @@ function fill_rangerB(date) {
     // string representing given day's dayNum, corrected for position on filth table
     let str_day_number = date.dayNumber + 1;
 
+    document.getElementById("0, u").style.backgroundColor = "lightgrey";
+
     // fills in the lab duty on the table for the given date
     document.getElementById(str_day_number + ", u").innerHTML = rb_worker.name;
+    document.getElementById(str_day_number + ", u").style.backgroundColor = "lightgrey";
 }
 
 // loops through each session day an calls fill_pool() on each day
 function fill_pools() {
+    
     for (let i = 1; i < 13; i++) {
         if (i == 7) {
             continue;
@@ -1003,41 +1118,34 @@ function fill_pools() {
             fill_pool(dayArray2[i]);
         }
     }
+
 }
 
 // fills the pool duty for the given date
 function fill_pool(date) {
-    
+
     // creates array of staff members to pull for pool from the pull_pool for the given date
     let lazies = []
     for (let x = 0; x < date.pull_pool.length; x++) {
         lazies.push(date.pull_pool[x])
     }
-
     // non-lifeguard pull pool
-    let non_lifeguard_lazies = [];
+    const non_lifeguard_lazies = [];
     // lifeguard pull pool
-    let lifeguard_lazies = [];
+    const lifeguard_lazies = [];
     
-    // makes an array of all available lifeguards for the day
-    for (let i = 0; i < staff_lg_array.length; i++) {
-        for (let n = 0; n < lazies.length; n++) {
-            if (staff_lg_array[i].name == lazies[n].name) {
-                // adds staff member to the lifeguard pull pool if they are a lifeguard
-                //console.log("new LG")
-                lifeguard_lazies.push(staff_lg_array[i]);
-            }
-            else {
-                // adds staff member to the non-lifeguard pull pool if they are not a lifeguard 
-                non_lifeguard_lazies.push(lazies[n]);
-            }
+
+    // adds lifeguards to lifeguard_lazies, adds non lifeguards to non_lifeguard_lazies (by looking at lifeguard booleans)
+    for (let n = 0; n < lazies.length; n++) {
+        if (lazies[n].lifeguard == 1) {
+            lifeguard_lazies.push(lazies[n])
+        }
+        else if (lazies[n].lifeguard == 0) {
+            non_lifeguard_lazies.push(lazies[n]);
         }
     }
-    console.log("lifeguard_lazies");
-    console.log(lifeguard_lazies);
+    
 
-    console.log("non_lifeguard_lazies");
-    console.log(non_lifeguard_lazies);
 
     pool_workers = [];
     
@@ -1074,6 +1182,7 @@ function fill_pool(date) {
         // removes the random staff member from non_lifeguard_lazies
         non_lifeguard_lazies.splice(rand, 1)[0].name;
     }
+    
 
     // combines the unassigned lifeguard and non-lifeguard pull pools to recreate the general pull pool
     for (let i = 0; i < lifeguard_lazies.length; i++) {
@@ -1104,10 +1213,10 @@ function fill_pool(date) {
         // adds the staff members assigned to kitchen for the given day to the filth table
         for (let i = 0; i < 2; i++) {
             if (i == 0) {
-                document.getElementById(str_day_number + ", l").innerHTML = pool_workers[i].name + " XX";
+                document.getElementById(str_day_number + ", l").innerHTML = pool_workers[i].name + "&nbsp &nbsp &nbsp" + "XX";
             }
             else if (i == 1) {
-                document.getElementById(str_day_number + ", m").innerHTML = pool_workers[i].name + " XX";
+                document.getElementById(str_day_number + ", m").innerHTML = pool_workers[i].name + "&nbsp &nbsp &nbsp" + "XX";
             }
         }
 
@@ -1116,12 +1225,59 @@ function fill_pool(date) {
     
 }
 
-// fills the duties for the given session day
-function fill_normal_day(date) {
-    nonDOPs_copy = date.nonDOPs.slice(0);
-    for (let i = 0; i < 14; i++) {
-
+// fills out who is undutied for each session day
+function fill_unassigned() {
+    for (let i = 1; i < 12; i++) {
+        if (i == 7) {
+            continue;
+        }
+        else {
+            fill_unassigneds(dayArray2[i]);
+        }
     }
-    
-    let backups = [];
+}
+
+// fills out who is undutied for the given date
+function fill_unassigneds(date) {
+
+    // string representing given day's dayNum, corrected for position on filth table
+    let stringDayId = date.dayNumber + 1;
+
+    let len = date.pull_pool.length;
+
+    document.getElementById("0, 4").style.backgroundColor = "lightgrey";
+    for (let n = 4; n < 10; n++) {
+        document.getElementById(stringDayId + ", " + n).style.backgroundColor = "lightgrey";
+    }
+
+    // leave cells blank if the day has no undutied staff members
+    if (len == 0) {
+        //document.getElementById(stringDayId + ", v").innerHTML = "";
+    }
+
+    // loops through the undutied staff members for the day and adds them to the correct cell
+    else {
+        let x = 0;
+        while (x < len) {
+            if (x == 0) {
+                document.getElementById(stringDayId + ", 4").innerHTML = date.pull_pool[x].name;
+            }
+            else if (x == 1) {
+                document.getElementById(stringDayId + ", 5").innerHTML = date.pull_pool[x].name;
+            }
+            else if (x == 2) {
+                document.getElementById(stringDayId + ", 6").innerHTML = date.pull_pool[x].name;
+            }
+            else if (x == 3) {
+                document.getElementById(stringDayId + ", 7").innerHTML = date.pull_pool[x].name;
+            }
+            else if (x == 4) {
+                document.getElementById(stringDayId + ", 8").innerHTML = date.pull_pool[x].name;
+            }
+            else if (x == 5) {
+                document.getElementById(stringDayId + ", 9").innerHTML = date.pull_pool[x].name;
+            }
+            x++;
+        }
+    }
 }
