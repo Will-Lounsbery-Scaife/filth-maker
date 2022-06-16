@@ -27,7 +27,7 @@ TO RUN THIS CODE:
 -Click "download zip"
 -Unzip the downloaded file, and store it in an appropriate location on your computer
 
--On PC:
+-On PC: /n
     -Open the folder that this program is stored in
     -Right click the file "name_entry.html"
     -Open with --> Google Chrome
