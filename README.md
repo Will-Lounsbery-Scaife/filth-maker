@@ -21,11 +21,7 @@ Things to note:
 .  
 .  
 TO RUN THIS CODE:  
-
--Go to https://github.com/Will-Lounsbery-Scaife/filth-maker
--Click the green "code" button
--Click "download zip"
--Unzip the downloaded file, and store it in an appropriate location on your computer
+-Download the zip file from github (green button that says "code")
 
 -If on PC:  
     -Open the folder that this program is stored in  
