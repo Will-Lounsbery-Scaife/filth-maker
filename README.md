@@ -37,6 +37,7 @@ TO RUN THIS CODE:
     -Click file --> open file --> navigate to where this program is stored on your computer --> click "name_entry.html"  
 
 -Once you have opened name_entry.html:  
+    -Do NOT enter the names of cooks, canteen, office assistant, AD, or any other undutied staff member
     -Type a male staff name in corresponding text box, then click add staff member. Do NOT press enter  
     -After you click, write a new name in the blank box below.  
     -When you have entered the last name of male staff, you STILL MUST CLICK THE ADD NEW MALE STAFF NAME BUTTON (there should be a blank text box under the last male staff entered)  
