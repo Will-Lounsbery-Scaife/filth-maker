@@ -4,6 +4,8 @@
 // make it so that staff members will not be assigned the same duty an excessive number of times, or multiple days in a row
 // implement an option for second session, which will change the duties given on the 4th of July to reflect the schedule for that day 
 
+// continue working on recs, then add functionality to other duties to prevent repetitions
+
 
 // Global variables
 // array of strings of all staff member names
@@ -14,8 +16,16 @@ var staffArrayObj = [];
 var dayArray = [];
 // array of every day object
 var dayArray2;
-// array of staff members that have "recently" been assigned kitchen
+// array of staff members that have "recently" been assigned these duties
 var recent_kitchens = [];
+var recent_recs = [];
+var recent_labs = [];
+var recent_libs = [];
+var recent_ts = [];
+var recent_rg = [];
+var recent_rb = [];
+
+// array of staff members that are lifeguards
 var staff_lg_array = [];
 
 // class for staff member objects
@@ -168,7 +178,7 @@ function getRandomInt(min, max) {
 
 // function to make the "skeleton" of the table containing the filth
 function makeTable () {
-    
+
     staffArray = [];
     staffArrayObj = [];
 
@@ -680,11 +690,6 @@ function fill_kitchens() {
     // sets the initial kitchen_pool
     kitchen_pool = staffArrayObj;
 
-    // what do the following two lines do?
-    let kitchen = new Duty("kitchen");
-    let localStaffArray = staffArrayObj;
-
-    
     // loops through each day of the session and calls fill_kitchen
     for (let i = 0; i < 14; i++) {
         
@@ -692,13 +697,12 @@ function fill_kitchens() {
             fill_kitchen(dayArray2[i]);
         }
         catch(error) {
-            console.log("error catch! " + dayArray2[i].dayID);
+            console.log("kitchen error catch! " + dayArray2[i].dayID);
             recent_kitchens = [];
             fill_kitchen(dayArray2[i]);
         }
         
     }
-    
 }
 
 // function to fill the kitchen duty with three staff members for the given date
@@ -711,15 +715,19 @@ function fill_kitchen(date) {
         lazies.push(date.pull_pool[x]);
         lazies_copy.push(date.pull_pool[x]);
     }
-    let remove_indices = []
- 
+    let remove_indices = [];
+    let recent_kitchens0 = [];
+
+    for (let i = 0; i < recent_kitchens.length; i++) {
+        recent_kitchens0.push(recent_kitchens[i]);
+    }
 
     // removes staff members from lazies if they have recently had kitchen using the recent_kitchens global variable
-    if (recent_kitchens.length >= 1) {
+    if (recent_kitchens0.length >= 1) {
         for (let q = 0; q < lazies.length; q++) {
             let name_check = lazies[q].name;
-            for (let w = 0; w < recent_kitchens.length; w++) {  
-                if (name_check == recent_kitchens[w].name) {             
+            for (let w = 0; w < recent_kitchens0.length; w++) {  
+                if (name_check == recent_kitchens0[w].name) {             
                     // stores the index of the staff member to be removed from lazies
                     remove_indices.push(q);   
                 }
@@ -737,7 +745,7 @@ function fill_kitchen(date) {
         }
     }
 
-    let lazies0 = []
+    let lazies0 = [];
     // adds the remaining staff members to a new lazies array of viable kitchen staff
     for (let x = 0; x < lazies.length; x++) {
         if (lazies[x]) {
@@ -750,7 +758,7 @@ function fill_kitchen(date) {
     // randomly generated number to select a staff member from the lazies array
     let rand;
 
-    
+
     // adds random staff member to workers
     rand = getRandomInt(0, lazies0.length - 1);
     workers.push(lazies0[rand]);
@@ -827,34 +835,98 @@ function fill_recs() {
 function fill_rec(date) {
 
     // creates array of staff members to pull for rec from the pull_pool for the given date
-    let lazies = []
+    let lazies = [];
+    let lazies_copy = [];
     for (let x = 0; x < date.pull_pool.length; x++) {
-        lazies.push(date.pull_pool[x])
+        lazies.push(date.pull_pool[x]);
+        lazies_copy.push(date.pull_pool[x]);
+    }
+
+    // removes peopel from recent recs from more than four days ago
+    if (recent_recs.length == 12) {
+        recent_recs.shift();
+        recent_recs.shift();
+        recent_recs.shift();
+    }
+
+    let remove_indices = [];
+    let recent_recs0 = [];
+
+    for (let i = 0; i < recent_recs.length; i++) {
+        recent_recs0.push(recent_recs[i]);
+    }
+
+    // removes staff members from lazies if they have recently had kitchen using the recent_recs global variable
+    if (recent_recs0.length >= 1) {
+        for (let q = 0; q < lazies.length; q++) {
+            let name_check = lazies[q].name;
+            for (let w = 0; w < recent_recs0.length; w++) {  
+                if (name_check == recent_recs0[w].name) {             
+                    // stores the index of the staff member to be removed from lazies
+                    remove_indices.push(q);   
+                }
+            }
+        }
+    }
+    // removes the staff members from lazies if their index is stored in remove_indices 
+    if (remove_indices.length > 0) {
+        for (let t = 0; t < remove_indices.length; t++) {
+            for (let u = 0; u < lazies.length; u++) {
+                if (u == remove_indices[t]) {
+                    lazies.splice(u, 1, null);
+                } 
+            }
+        }
+    }
+
+    let lazies0 = [];
+    // adds the remaining staff members to a new lazies array of viable rec staff
+    for (let x = 0; x < lazies.length; x++) {
+        if (lazies[x]) {
+            lazies0.push(lazies[x]);
+        }
     }
 
 
     let rec_workers = [];
 
-    // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies.length - 1);
-    rec_workers.push(lazies[rand]);
-    // removes the random staff member from lazies
-    lazies.splice(rand, 1)[0].name;
+
+    console.log(lazies0)
+    console.log(recent_recs0)
 
     // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies.length - 1);
-    rec_workers.push(lazies[rand]);
+    rand = getRandomInt(0, lazies0.length - 1);
+    rec_workers.push(lazies0[rand]);
+    recent_recs.push(lazies0[rand]);
     // removes the random staff member from lazies
-    lazies.splice(rand, 1)[0].name;
+    lazies0.splice(rand, 1)[0].name;
 
     // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies.length - 1);
-    rec_workers.push(lazies[rand]);
+    rand = getRandomInt(0, lazies0.length - 1);
+    rec_workers.push(lazies0[rand]);
+    recent_recs.push(lazies0[rand]);
     // removes the random staff member from lazies
-    lazies.splice(rand, 1)[0].name;
+    lazies0.splice(rand, 1)[0].name;
+
+    // adds random staff member to rec_workers
+    rand = getRandomInt(0, lazies0.length - 1);
+    rec_workers.push(lazies0[rand]);
+    recent_recs.push(lazies0[rand]);
+    // removes the random staff member from lazies
+    lazies0.splice(rand, 1)[0].name;
+
+
+    // removes the rec workers from the general pull pool (not the lazies specific to rec viable staff)
+    for (let x = 0; x < 3; x++) {
+        for (let y = 0; y < lazies_copy.length; y++) {
+            if (rec_workers[x].name == lazies_copy[y].name) {
+                lazies_copy.splice(y, 1);
+            }
+        }
+    }
 
     // sets the pull pool for the date to the modified lazies array
-    date.pull_pool = lazies;
+    date.pull_pool = lazies_copy;
     // sets the given dates kit property to the array of staff members added to workers
     date.rec = rec_workers;
     // string representing given day's dayNum, corrected for position on filth table
@@ -894,6 +966,7 @@ function fill_labs() {
                 fill_lab(dayArray2[i]);
             }
             catch (error) {
+                let str_day_number = dayArray2[i].dayNumber + 1;
                 console.log(dayArray2[i].dayID + " can't fill lab: everyone is dutied!");
                 document.getElementById(i + 1 + ", g").innerHTML = "double up!";
                 document.getElementById(str_day_number + ", g").style.backgroundColor = "lightgrey";
@@ -917,11 +990,11 @@ function fill_lab(date) {
     lazies.splice(rand, 1)[0].name;
 
     // sets the pull pool for the date to the modified lazies array
-    //date.pull_pool = lazies;
-    date.pull_pool = [];
-    for (let x = 0; x < lazies.length; x++) {
-        date.pull_pool.push(lazies[x]);
-    }
+    date.pull_pool = lazies;
+    //date.pull_pool = [];
+    //for (let x = 0; x < lazies.length; x++) {
+    //    date.pull_pool.push(lazies[x]);
+    //}
 
     // sets the given dates kit property to the array of staff members added to workers
     date.lab = lab_worker;
@@ -990,7 +1063,9 @@ function fill_tablesetters() {
                 fill_tablesetter(dayArray2[i]);
             }
             catch (error) {
+                console.error(error);
                 console.log(dayArray2[i].dayID + " can't fill tablesetters: everyone is dutied!");
+                console.log(dayArray2[i].pull_pool);
                 document.getElementById(i + 1 + ", q").innerHTML = "double up!";
             }
         }
