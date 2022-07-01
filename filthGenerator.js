@@ -1,10 +1,7 @@
 // TODO: 
 // figure out the male/fem/neutral situation with BBH/GBH duties, and maybe make it so head counselors always have bunkhouse on the first day of the session
 // once the bunkhouse duties are implemented, tie the grace duties to those duties
-// make it so that staff members will not be assigned the same duty an excessive number of times, or multiple days in a row
-// implement an option for second session, which will change the duties given on the 4th of July to reflect the schedule for that day 
-
-// continue working on recs, then add functionality to other duties to prevent repetitions
+// make it so kitchen and pool is more spread out (and do something about incomplete kitchen days)
 
 
 // Global variables
@@ -24,6 +21,8 @@ var recent_libs = [];
 var recent_ts = [];
 var recent_rg = [];
 var recent_rb = [];
+
+var fourthJuly;
 
 // array of staff members that are lifeguards
 var staff_lg_array = [];
@@ -185,8 +184,7 @@ function makeTable () {
     lg_str = window.localStorage.getItem('lifeguardStorage');
     lg_arr = lg_str.split(',');
 
-    //document.getElementById('LG').innerHTML += "Lifeguards:  ";
-    //document.getElementById('LG').innerHTML += lg_arr;
+    fourthJuly = window.localStorage.getItem("fourthStorage");
 
     staffArray0 = window.localStorage.getItem("array_of_staff_names");
     staffArrayObj0 = window.localStorage.getItem("array_of_staff");
@@ -211,16 +209,7 @@ function makeTable () {
     document.getElementById("testMe").innerHTML += "Remember not to grab creamer if the power is out :)";
     document.getElementById("testMe").style.fontSize = "larger";
     document.getElementById("testMe").style.fontWeight = "900";
-    /*
-    for (let i = 0; i < staffArray.length; i++) {
-        if (i == staffArray.length - 1) {
-            document.getElementById("testMe").innerHTML += staffArrayObj[i].name;
-        }
-        else {
-            document.getElementById("testMe").innerHTML += staffArrayObj[i].name + ", ";
-        }
-    }
-    */
+
 
     // variables to determine number of rows and columns
     var rows = 35;
@@ -257,7 +246,7 @@ function makeTable () {
             case "13, 7": case "13, 8": case "13, 9": case "14, 4": case "14, 5": case "14, 6": case "14, 7":
             case "14, 8": case "14, 9": case "14, 3": case "14, 2": case "14, 1": case "14, z": case "14, y":
             case "14, x": case "14, w": case "14, g": case "14, h": case "14, i": case "14, j": case "14, k":
-            case "14, l": case "14, m": case "14, r": case "14, s": case "14, t":
+            case "14, l": case "14, m": case "14, r": case "14, s": case "14, t": case "13, v": case "14, v":
             case "13, w": case "13, x": case "13, y": case "13, z": case "13, 1": case "13, 2": case "13, 3":
                 document.getElementById(curCell).style.backgroundColor = "grey";
                 break;
@@ -420,6 +409,7 @@ function makeTable () {
 // creates a day object for each day in the session, and add the DOPs to each day based on form answers
 function generate_DOPs() {
     
+    // stores the staff members selected as lifeguards in an array
     let lifeguards_form = document.getElementById("lifeguardform");
     lifeguard_collection = lifeguards_form.selectedOptions;
     lifeguard_array = [];
@@ -427,6 +417,11 @@ function generate_DOPs() {
         lifeguard_array.push(lifeguard_collection[i].text);
     }
     window.localStorage.setItem('lifeguardStorage', lifeguard_array);
+
+    // stores the day selected as fourth of july
+    fourthJulyInput = document.getElementById("fourthOfJulyForm").value;
+    window.localStorage.setItem('fourthStorage', fourthJulyInput)
+
 
     // collection of all the multiple select inputs asking for DOPs of each day
     let inputElements_DOPs = document.getElementsByClassName("selectDOP");
@@ -611,7 +606,7 @@ function show_staff_lists() {
     }
 }
 
-
+// function to add the names of staff members to the DOP selection forms
 function addOption(selectId) {
     let select = document.getElementById(selectId);
     for(let s = 0; s < staffArray.length; s++) {
@@ -834,6 +829,16 @@ function fill_recs() {
 // function to fill the rec duty for a given session day
 function fill_rec(date) {
 
+    // string representing given day's dayNum, corrected for position on filth table
+    let str_day_number = date.dayNumber + 1;
+    // no rec if 4th of july; greys out boxes, skips rest of function
+    if (fourthJuly == date.dayID) {
+        document.getElementById(str_day_number + ", i").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", j").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", k").style.backgroundColor = "grey";
+        return;
+    }
+
     // creates array of staff members to pull for rec from the pull_pool for the given date
     let lazies = [];
     let lazies_copy = [];
@@ -842,7 +847,7 @@ function fill_rec(date) {
         lazies_copy.push(date.pull_pool[x]);
     }
 
-    // removes peopel from recent recs from more than four days ago
+    // removes people from recent recs from more than four days ago
     if (recent_recs.length == 12) {
         recent_recs.shift();
         recent_recs.shift();
@@ -856,7 +861,7 @@ function fill_rec(date) {
         recent_recs0.push(recent_recs[i]);
     }
 
-    // removes staff members from lazies if they have recently had kitchen using the recent_recs global variable
+    // removes staff members from lazies if they have recently had rec using the recent_recs global variable
     if (recent_recs0.length >= 1) {
         for (let q = 0; q < lazies.length; q++) {
             let name_check = lazies[q].name;
@@ -887,34 +892,72 @@ function fill_rec(date) {
         }
     }
 
-
     let rec_workers = [];
+    
+    // execute only if there are enough viable staff members in lazies0
+    if (lazies0.length >= 1) {
+        // adds random staff member to rec_workers
+        rand = getRandomInt(0, lazies0.length - 1);
+        rec_workers.push(lazies0[rand]);
+        recent_recs.push(lazies0[rand]);
+        // removes the random staff member from lazies
+        lazies0.splice(rand, 1)[0].name;
+    }
+    // assigns rec to someone who HAS had rec recently
+    else {
+        // adds random staff member to rec_workers
+        rand = getRandomInt(0, lazies_copy.length - 1);
+        rec_workers.push(lazies_copy[rand]);
+        recent_recs.push(lazies_copy[rand]);
+        // removes the random staff member from lazies
+        lazies_copy.splice(rand, 1)[0].name;
+    }
 
+    // execute only if there are enough viable staff members in lazies0
+    if (lazies0.length >= 1) {
+        // adds random staff member to rec_workers
+        rand = getRandomInt(0, lazies0.length - 1);
+        rec_workers.push(lazies0[rand]);
+        recent_recs.push(lazies0[rand]);
+        // removes the random staff member from lazies
+        lazies0.splice(rand, 1)[0].name;
+    }
+    // assigns rec to someone who HAS had rec recently
+    else {
+        // adds random staff member to rec_workers
+        rand = getRandomInt(0, lazies_copy.length - 1);
+        // selects a different staff member if the randomly selected one is already in rec workers
+        while (rec_workers[0] == lazies_copy[rand]) {
+            rand = getRandomInt(0, lazies_copy.length - 1);
+        }
+        rec_workers.push(lazies_copy[rand]);
+        recent_recs.push(lazies_copy[rand]);
+        // removes the random staff member from lazies
+        lazies_copy.splice(rand, 1)[0].name;
+    }
 
-    console.log(lazies0)
-    console.log(recent_recs0)
-
-    // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies0.length - 1);
-    rec_workers.push(lazies0[rand]);
-    recent_recs.push(lazies0[rand]);
-    // removes the random staff member from lazies
-    lazies0.splice(rand, 1)[0].name;
-
-    // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies0.length - 1);
-    rec_workers.push(lazies0[rand]);
-    recent_recs.push(lazies0[rand]);
-    // removes the random staff member from lazies
-    lazies0.splice(rand, 1)[0].name;
-
-    // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies0.length - 1);
-    rec_workers.push(lazies0[rand]);
-    recent_recs.push(lazies0[rand]);
-    // removes the random staff member from lazies
-    lazies0.splice(rand, 1)[0].name;
-
+    // execute only if there are enough viable staff members in lazies0
+    if (lazies0.length >= 1) {
+        // adds random staff member to rec_workers
+        rand = getRandomInt(0, lazies0.length - 1);
+        rec_workers.push(lazies0[rand]);
+        recent_recs.push(lazies0[rand]);
+        // removes the random staff member from lazies
+        lazies0.splice(rand, 1)[0].name;
+    }
+    // assigns rec to someone who HAS had rec recently
+    else {
+        // adds random staff member to rec_workers
+        rand = getRandomInt(0, lazies_copy.length - 1);
+        // selects a different staff member if the randomly selected one is already in rec workers
+        while (rec_workers[0] == lazies_copy[rand] || rec_workers[1] == lazies_copy[rand] ) {
+            rand = getRandomInt(0, lazies_copy.length - 1);
+        }
+        rec_workers.push(lazies_copy[rand]);
+        recent_recs.push(lazies_copy[rand]);
+        // removes the random staff member from lazies
+        lazies_copy.splice(rand, 1)[0].name;
+    }
 
     // removes the rec workers from the general pull pool (not the lazies specific to rec viable staff)
     for (let x = 0; x < 3; x++) {
@@ -927,10 +970,9 @@ function fill_rec(date) {
 
     // sets the pull pool for the date to the modified lazies array
     date.pull_pool = lazies_copy;
-    // sets the given dates kit property to the array of staff members added to workers
+    // sets the given dates rec property to the array of staff members added to workers
     date.rec = rec_workers;
-    // string representing given day's dayNum, corrected for position on filth table
-    let str_day_number = date.dayNumber + 1;
+
 
     document.getElementById("0, i").style.backgroundColor = "lightgrey";
     document.getElementById("0, j").style.backgroundColor = "lightgrey";
@@ -955,103 +997,6 @@ function fill_rec(date) {
 
 }
 
-// loops through each session day and calls fill_lab on the given day
-function fill_labs() {
-    for (let i = 0; i < 14; i++) {
-        if (i == 0 || i == 7 || i == 12 || i == 13) {
-            continue;
-        }
-        else {
-            try {
-                fill_lab(dayArray2[i]);
-            }
-            catch (error) {
-                let str_day_number = dayArray2[i].dayNumber + 1;
-                console.log(dayArray2[i].dayID + " can't fill lab: everyone is dutied!");
-                document.getElementById(i + 1 + ", g").innerHTML = "double up!";
-                document.getElementById(str_day_number + ", g").style.backgroundColor = "lightgrey";
-            }
-        }
-    }
-}
-
-// function to fill the lab duty for a given session day
-function fill_lab(date) {
-    // creates array of staff members to pull for lab from the pull_pool for the given date
-    let lazies = []
-    for (let x = 0; x < date.pull_pool.length; x++) {
-        lazies.push(date.pull_pool[x])
-    }
-
-    // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies.length - 1);
-    lab_worker = lazies[rand];
-    // removes the random staff member from lazies
-    lazies.splice(rand, 1)[0].name;
-
-    // sets the pull pool for the date to the modified lazies array
-    date.pull_pool = lazies;
-    //date.pull_pool = [];
-    //for (let x = 0; x < lazies.length; x++) {
-    //    date.pull_pool.push(lazies[x]);
-    //}
-
-    // sets the given dates kit property to the array of staff members added to workers
-    date.lab = lab_worker;
-    // string representing given day's dayNum, corrected for position on filth table
-    let str_day_number = date.dayNumber + 1;
-
-    document.getElementById("0, g").style.backgroundColor = "lightgrey";
-
-    // fills in the lab duty on the table for the given date
-    document.getElementById(str_day_number + ", g").innerHTML = lab_worker.name;
-    document.getElementById(str_day_number + ", g").style.backgroundColor = "lightgrey";
-}
-
-// loops through each session day and calls fill_lib on the given day
-function fill_libs() {
-    for (let i = 0; i < 14; i++) {
-        if (i == 0 || i == 7 || i == 12 || i == 13) {
-            continue;
-        }
-        else {
-            try {
-                fill_lib(dayArray2[i]);
-            }
-            catch (error) {
-                console.log(dayArray2[i].dayID + " can't fill library: everyone is dutied!");
-                document.getElementById(i + 1 + ", h").innerHTML = "double up!";
-            }
-        }
-    }
-}
-
-// function to fill the library duty for a given session day
-function fill_lib(date) {
-    // creates array of staff members to pull for library from the pull_pool for the given date
-    let lazies = []
-    for (let x = 0; x < date.pull_pool.length; x++) {
-        lazies.push(date.pull_pool[x])
-    }
-
-
-    // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies.length - 1);
-    lib_worker = lazies[rand];
-    // removes the random staff member from lazies
-    lazies.splice(rand, 1)[0].name;
-
-    // sets the pull pool for the date to the modified lazies array
-    date.pull_pool = lazies;
-    // sets the given dates kit property to the array of staff members assigned to library
-    date.lib = lib_worker;
-    // string representing given day's dayNum, corrected for position on filth table
-    let str_day_number = date.dayNumber + 1;
-
-    // fills in the library duty on the table for the given date
-    document.getElementById(str_day_number + ", h").innerHTML = lib_worker.name;
-}
-
 // loops through each session day and calls fill_tablesetter on the each day
 function fill_tablesetters() {
     for (let i = 0; i < 13; i++) {
@@ -1074,20 +1019,69 @@ function fill_tablesetters() {
 
 // function to fill the tablesetters duty for a given session day
 function fill_tablesetter(date) {
-    // creates array of staff members to pull from the pull_pool for the given date
-    let lazies = []
+    
+    // creates array of staff members to pull for ts from the pull_pool for the given date
+    let lazies = [];
+    let lazies_copy = [];
     for (let x = 0; x < date.pull_pool.length; x++) {
-        lazies.push(date.pull_pool[x])
+        lazies.push(date.pull_pool[x]);
+        lazies_copy.push(date.pull_pool[x]);
     }
 
-    // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies.length - 1);
-    ts_worker = lazies[rand];
+    let remove_indices = [];
+    let recent_ts0 = [];
+
+    for (let i = 0; i < recent_ts.length; i++) {
+        recent_ts0.push(recent_ts[i]);
+    }
+
+    // removes staff members from lazies if they have recently had ts using the recent_ts global variable
+    if (recent_ts0.length >= 1) {
+        for (let q = 0; q < lazies.length; q++) {
+            let name_check = lazies[q].name;
+            for (let w = 0; w < recent_ts0.length; w++) {  
+                if (name_check == recent_ts0[w].name) {             
+                    // stores the index of the staff member to be removed from lazies
+                    remove_indices.push(q);   
+                }
+            }
+        }
+    }
+    // removes the staff members from lazies if their index is stored in remove_indices 
+    if (remove_indices.length > 0) {
+        for (let t = 0; t < remove_indices.length; t++) {
+            for (let u = 0; u < lazies.length; u++) {
+                if (u == remove_indices[t]) {
+                    lazies.splice(u, 1, null);
+                } 
+            }
+        }
+    }
+
+    let lazies0 = [];
+    // adds the remaining staff members to a new lazies array of viable ts staff
+    for (let x = 0; x < lazies.length; x++) {
+        if (lazies[x]) {
+            lazies0.push(lazies[x]);
+        }
+    }
+
+    // adds random staff member to ts_worker
+    rand = getRandomInt(0, lazies0.length - 1);
+    ts_worker = lazies0[rand];
+    recent_ts.push(lazies0[rand]);
     // removes the random staff member from lazies
-    lazies.splice(rand, 1)[0].name;
+    //lazies0.splice(rand, 1)[0].name;
+
+    // removes the ts worker from the general pull pool (not the lazies specific to ts viable staff)
+    for (let y = 0; y < lazies_copy.length; y++) {
+        if (ts_worker.name == lazies_copy[y].name) {
+            lazies_copy.splice(y, 1);
+        }
+    }
 
     // sets the pull pool for the date to the modified lazies array
-    date.pull_pool = lazies;
+    date.pull_pool = lazies_copy;
     // sets the given dates ts property to staff members assigned to tablesetters
     date.ts = ts_worker;
     // string representing given day's dayNum, corrected for position on filth table
@@ -1097,89 +1091,403 @@ function fill_tablesetter(date) {
     document.getElementById(str_day_number + ", q").innerHTML = ts_worker.name;
 }
 
+// loops through each session day and calls fill_lab on the given day
+function fill_labs() {
+    document.getElementById("0, g").style.backgroundColor = "lightgrey";
+    for (let i = 0; i < 14; i++) {
+        if (i == 0 || i == 7 || i == 12 || i == 13) {
+            continue;
+        }
+        else {
+            fill_lab(dayArray2[i]);
+        }
+        
+    }
+}
+
+// function to fill the lab duty for a given session day
+function fill_lab(date) {
+    
+    // string representing given day's dayNum, corrected for position on filth table
+    let str_day_number = date.dayNumber + 1;
+
+    if (fourthJuly == date.dayID) {
+        return;
+    }
+
+    // creates array of staff members to pull for lab from the pull_pool for the given date
+    let lazies = [];
+    let lazies_copy = [];
+    for (let x = 0; x < date.pull_pool.length; x++) {
+        lazies.push(date.pull_pool[x]);
+        lazies_copy.push(date.pull_pool[x]);
+    }
+
+    let remove_indices = [];
+    let recent_labs0 = [];
+
+    for (let i = 0; i < recent_labs.length; i++) {
+        recent_labs0.push(recent_labs[i]);
+    }
+
+    // removes staff members from lazies if they have recently had ts using the recent_ts global variable
+    if (recent_labs0.length >= 1) {
+        for (let q = 0; q < lazies.length; q++) {
+            let name_check = lazies[q].name;
+            for (let w = 0; w < recent_labs0.length; w++) {  
+                if (name_check == recent_labs0[w].name) {             
+                    // stores the index of the staff member to be removed from lazies
+                    remove_indices.push(q);   
+                }
+            }
+        }
+    }
+    // removes the staff members from lazies if their index is stored in remove_indices 
+    if (remove_indices.length > 0) {
+        for (let t = 0; t < remove_indices.length; t++) {
+            for (let u = 0; u < lazies.length; u++) {
+                if (u == remove_indices[t]) {
+                    lazies.splice(u, 1, null);
+                } 
+            }
+        }
+    }
+
+    let lazies0 = [];
+    // adds the remaining staff members to a new lazies array of viable lab staff
+    for (let x = 0; x < lazies.length; x++) {
+        if (lazies[x]) {
+            lazies0.push(lazies[x]);
+        }
+    }
+
+    if (lazies0.length == 0) {
+        document.getElementById(str_day_number + ", g").innerHTML = "double up!";
+        document.getElementById(str_day_number + ", g").style.backgroundColor = "lightgrey";
+        // sets the pull pool for the date to the modified lazies array
+        date.pull_pool = lazies_copy;
+    }
+
+    else {
+        // adds random staff member to lab_worker
+        rand = getRandomInt(0, lazies0.length - 1);
+        lab_worker = lazies0[rand];
+        recent_labs.push(lazies0[rand]);
+        // removes the random staff member from lazies
+        //lazies0.splice(rand, 1)[0].name;
+
+        // removes the lab worker from the general pull pool (not the lazies specific to lab viable staff)
+        for (let y = 0; y < lazies_copy.length; y++) {
+            if (lab_worker.name == lazies_copy[y].name) {
+                lazies_copy.splice(y, 1);
+            }
+        }
+
+        // sets the pull pool for the date to the modified lazies array
+        date.pull_pool = lazies_copy;
+        // sets the given dates kit property to the array of staff members added to workers
+        date.lab = lab_worker;
+
+        // fills in the lab duty on the table for the given date
+        document.getElementById(str_day_number + ", g").innerHTML = lab_worker.name;
+        document.getElementById(str_day_number + ", g").style.backgroundColor = "lightgrey";
+    }
+}
+
+// loops through each session day and calls fill_lib on the given day
+function fill_libs() {
+    for (let i = 0; i < 14; i++) {
+        if (i == 0 || i == 7 || i == 12 || i == 13) {
+            continue;
+        }
+        else {
+            fill_lib(dayArray2[i]);
+            /*
+            try {
+                fill_lib(dayArray2[i]);
+            }
+            catch (error) {
+                console.log(dayArray2[i].dayID + " can't fill library: everyone is dutied!");
+                document.getElementById(i + 1 + ", h").innerHTML = "double up!";
+            }
+            */
+        }
+    }
+}
+
+// function to fill the library duty for a given session day
+function fill_lib(date) {
+    
+    // string representing given day's dayNum, corrected for position on filth table
+    let str_day_number = date.dayNumber + 1;
+
+    if (fourthJuly == date.dayID) {
+        return;
+    }
+
+    // creates array of staff members to pull for lib from the pull_pool for the given date
+    let lazies = [];
+    let lazies_copy = [];
+    for (let x = 0; x < date.pull_pool.length; x++) {
+        lazies.push(date.pull_pool[x]);
+        lazies_copy.push(date.pull_pool[x]);
+    }
+
+    let remove_indices = [];
+    let recent_libs0 = [];
+
+    for (let i = 0; i < recent_libs.length; i++) {
+        recent_libs0.push(recent_libs[i]);
+    }
+
+    // removes staff members from lazies if they have recently had lib using the recent_libs global variable
+    if (recent_libs0.length >= 1) {
+        for (let q = 0; q < lazies.length; q++) {
+            let name_check = lazies[q].name;
+            for (let w = 0; w < recent_libs0.length; w++) {  
+                if (name_check == recent_libs0[w].name) {             
+                    // stores the index of the staff member to be removed from lazies
+                    remove_indices.push(q);   
+                }
+            }
+        }
+    }
+    // removes the staff members from lazies if their index is stored in remove_indices 
+    if (remove_indices.length > 0) {
+        for (let t = 0; t < remove_indices.length; t++) {
+            for (let u = 0; u < lazies.length; u++) {
+                if (u == remove_indices[t]) {
+                    lazies.splice(u, 1, null);
+                } 
+            }
+        }
+    }
+
+    let lazies0 = [];
+    // adds the remaining staff members to a new lazies array of viable lib staff
+    for (let x = 0; x < lazies.length; x++) {
+        if (lazies[x]) {
+            lazies0.push(lazies[x]);
+        }
+    }
+
+    if (lazies0.length == 0) {
+        document.getElementById(str_day_number + ", h").innerHTML = "double up!";
+        // sets the pull pool for the date to the modified lazies array
+        date.pull_pool = lazies_copy;
+    }
+
+    else {
+        // adds random staff member to lib_worker
+        rand = getRandomInt(0, lazies0.length - 1);
+        lib_worker = lazies0[rand];
+        recent_libs.push(lazies0[rand]);
+        // removes the random staff member from lazies
+        //lazies0.splice(rand, 1)[0].name;
+
+        // removes the lib worker from the general pull pool (not the lazies specific to lib viable staff)
+        for (let y = 0; y < lazies_copy.length; y++) {
+            if (lib_worker.name == lazies_copy[y].name) {
+                lazies_copy.splice(y, 1);
+            }
+        }
+
+        // sets the pull pool for the date to the modified lazies array
+        date.pull_pool = lazies_copy;
+        // sets the given dates lib property to the array of staff members added to workers
+        date.lib = lib_worker;
+
+        // fills in the lab duty on the table for the given date
+        document.getElementById(str_day_number + ", h").innerHTML = lib_worker.name;
+    }
+}
+
 // loops through each session day and calls fill_rangerG on the each day
 function fill_rangerGs() {
+    document.getElementById("0, t").style.backgroundColor = "lightgrey";
     for (let i = 1; i < 13; i++) {
         if (i==7) {
             continue;
         }
         else {
-            try {
-                fill_rangerG(dayArray2[i]);
-            }
-            catch (error) {
-                console.log(dayArray2[i].dayID + " can't fill ranger G: everyone is dutied!");
-                document.getElementById(i + 1 + ", t").innerHTML = "double up!";
-            }
+            fill_rangerG(dayArray2[i]);
         }
     }
 }
 
 // function to fill the ranger G duty for a given session day
 function fill_rangerG(date) {
-    // creates array of staff members to pull from the pull_pool for the given date
-    let lazies = []
-    for (let x = 0; x < date.pull_pool.length; x++) {
-        lazies.push(date.pull_pool[x])
-    }
-
-    // adds random staff member to rec_workers
-    rand = getRandomInt(0, lazies.length - 1);
-    rg_worker = lazies[rand];
-    // removes the random staff member from lazies
-    lazies.splice(rand, 1)[0].name;
-
-    // sets the pull pool for the date to the modified lazies array
-    date.pull_pool = lazies;
-    // sets the given dates ts property to staff members assigned to tablesetters
-    date.rg = rg_worker;
     // string representing given day's dayNum, corrected for position on filth table
     let str_day_number = date.dayNumber + 1;
 
-    // fills in the lab duty on the table for the given date
-    document.getElementById(str_day_number + ", t").innerHTML = rg_worker.name;
+    // creates array of staff members to pull for rg from the pull_pool for the given date
+    let lazies = [];
+    let lazies_copy = [];
+    for (let x = 0; x < date.pull_pool.length; x++) {
+        lazies.push(date.pull_pool[x]);
+        lazies_copy.push(date.pull_pool[x]);
+    }
+
+    let remove_indices = [];
+    let recent_rg0 = [];
+
+    for (let i = 0; i < recent_rg.length; i++) {
+        recent_rg0.push(recent_rg[i]);
+    }
+    
+    // removes staff members from lazies if they have recently had rg using the recent_rg global variable
+    if (recent_rg0.length >= 1) {
+        for (let q = 0; q < lazies.length; q++) {
+            let name_check = lazies[q].name;
+            for (let w = 0; w < recent_rg0.length; w++) {  
+                if (name_check == recent_rg0[w].name) {             
+                    // stores the index of the staff member to be removed from lazies
+                    remove_indices.push(q);   
+                }
+            }
+        }
+    }
+    // removes the staff members from lazies if their index is stored in remove_indices 
+    if (remove_indices.length > 0) {
+        for (let t = 0; t < remove_indices.length; t++) {
+            for (let u = 0; u < lazies.length; u++) {
+                if (u == remove_indices[t]) {
+                    lazies.splice(u, 1, null);
+                } 
+            }
+        }
+    }
+
+    let lazies0 = [];
+    // adds the remaining staff members to a new lazies array of viable rg staff
+    for (let x = 0; x < lazies.length; x++) {
+        if (lazies[x]) {
+            lazies0.push(lazies[x]);
+        }
+    }
+
+    if (lazies0.length == 0) {
+        document.getElementById(str_day_number + ", t").innerHTML = "double up!";
+        document.getElementById(str_day_number + ", t").style.backgroundColor = "lightgrey";
+
+        // sets the pull pool for the date to the modified lazies array
+        date.pull_pool = lazies_copy;
+    }
+
+    else {
+        // adds random staff member to rg_worker
+        rand = getRandomInt(0, lazies0.length - 1);
+        rg_worker = lazies0[rand];
+        recent_rg.push(lazies0[rand]);
+        // removes the random staff member from lazies
+        //lazies0.splice(rand, 1)[0].name;
+
+        // removes the rg worker from the general pull pool (not the lazies specific to rg viable staff)
+        for (let y = 0; y < lazies_copy.length; y++) {
+            if (rg_worker.name == lazies_copy[y].name) {
+                lazies_copy.splice(y, 1);
+            }
+        }
+
+        // sets the pull pool for the date to the modified lazies array
+        date.pull_pool = lazies_copy;
+        // sets the given dates lib property to the array of staff members added to workers
+        date.rg = rg_worker;
+
+        // fills in the lab duty on the table for the given date
+        document.getElementById(str_day_number + ", t").innerHTML = rg_worker.name;
+        document.getElementById(str_day_number + ", t").style.backgroundColor = "lightgrey";
+    }
 }
 
 // loops through each session day and calls fill_rangerB() on the each day
 function fill_rangerBs() {
     for (let i = 1; i < 14; i++) {
-        try {
-            fill_rangerB(dayArray2[i]);
-        }
-        catch (error) {
-            console.log(dayArray2[i].dayID + " can't fill ranger B: everyone is dutied!");
-            document.getElementById(i + 1 + ", u").innerHTML = "double up!";
-            document.getElementById(i + 1 + ", u").style.backgroundColor = "lightgrey";
-        }
+        fill_rangerB(dayArray2[i]);
     }
 }
 
 // function to fill the ranger B duty for a given session day
 function fill_rangerB(date) {
-    // creates array of staff members to pull from the pull_pool for the given date
-    let lazies = []
-    for (let x = 0; x < date.pull_pool.length; x++) {
-        lazies.push(date.pull_pool[x])
-    }
+   // string representing given day's dayNum, corrected for position on filth table
+   let str_day_number = date.dayNumber + 1;
 
-    // assigns random staff member to rb_worker
-    rand = getRandomInt(0, lazies.length - 1);
-    rb_worker = lazies[rand];
-    // removes the random staff member from lazies
-    lazies.splice(rand, 1)[0].name;
+   // creates array of staff members to pull for rb from the pull_pool for the given date
+   let lazies = [];
+   let lazies_copy = [];
+   for (let x = 0; x < date.pull_pool.length; x++) {
+       lazies.push(date.pull_pool[x]);
+       lazies_copy.push(date.pull_pool[x]);
+   }
 
-    // sets the pull pool for the date to the modified lazies array
-    date.pull_pool = lazies;
-    // sets the given dates ts property to staff members assigned to tablesetters
-    date.rb = rb_worker;
-    // string representing given day's dayNum, corrected for position on filth table
-    let str_day_number = date.dayNumber + 1;
+   let remove_indices = [];
+   let recent_rb0 = [];
 
-    document.getElementById("0, u").style.backgroundColor = "lightgrey";
+   for (let i = 0; i < recent_rb.length; i++) {
+       recent_rb0.push(recent_rb[i]);
+   }
+   
+   // removes staff members from lazies if they have recently had rb using the recent_rb global variable
+   if (recent_rb0.length >= 1) {
+       for (let q = 0; q < lazies.length; q++) {
+           let name_check = lazies[q].name;
+           for (let w = 0; w < recent_rb0.length; w++) {  
+               if (name_check == recent_rb0[w].name) {             
+                   // stores the index of the staff member to be removed from lazies
+                   remove_indices.push(q);   
+               }
+           }
+       }
+   }
+   // removes the staff members from lazies if their index is stored in remove_indices 
+   if (remove_indices.length > 0) {
+       for (let t = 0; t < remove_indices.length; t++) {
+           for (let u = 0; u < lazies.length; u++) {
+               if (u == remove_indices[t]) {
+                   lazies.splice(u, 1, null);
+               } 
+           }
+       }
+   }
 
-    // fills in the lab duty on the table for the given date
-    document.getElementById(str_day_number + ", u").innerHTML = rb_worker.name;
-    document.getElementById(str_day_number + ", u").style.backgroundColor = "lightgrey";
+   let lazies0 = [];
+   // adds the remaining staff members to a new lazies array of viable rb staff
+   for (let x = 0; x < lazies.length; x++) {
+       if (lazies[x]) {
+           lazies0.push(lazies[x]);
+       }
+   }
+
+   if (lazies0.length == 0) {
+       document.getElementById(str_day_number + ", u").innerHTML = "double up!";
+
+       // sets the pull pool for the date to the modified lazies array
+       date.pull_pool = lazies_copy;
+   }
+
+   else {
+       // adds random staff member to rb_worker
+       rand = getRandomInt(0, lazies0.length - 1);
+       rb_worker = lazies0[rand];
+       recent_rb.push(lazies0[rand]);
+       // removes the random staff member from lazies
+       //lazies0.splice(rand, 1)[0].name;
+
+       // removes the rb worker from the general pull pool (not the lazies specific to rb viable staff)
+       for (let y = 0; y < lazies_copy.length; y++) {
+           if (rb_worker.name == lazies_copy[y].name) {
+               lazies_copy.splice(y, 1);
+           }
+       }
+
+       // sets the pull pool for the date to the modified lazies array
+       date.pull_pool = lazies_copy;
+       // sets the given dates lib property to the array of staff members added to workers
+       date.rb = rb_worker;
+
+       // fills in the lab duty on the table for the given date
+       document.getElementById(str_day_number + ", u").innerHTML = rb_worker.name;
+   }
 }
 
 // loops through each session day an calls fill_pool() on each day
@@ -1198,6 +1506,31 @@ function fill_pools() {
 
 // fills the pool duty for the given date
 function fill_pool(date) {
+
+
+    // string representing given day's dayNum, corrected for position on filth table
+    let str_day_number = date.dayNumber + 1;
+
+    if (fourthJuly == date.dayID) {
+        document.getElementById(str_day_number + ", e").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", f").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", g").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", h").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", i").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", j").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", k").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", l").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", m").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", v").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", w").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", x").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", y").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", z").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", 1").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", 2").style.backgroundColor = "grey";
+        document.getElementById(str_day_number + ", 3").style.backgroundColor = "grey";
+        return;
+    }
 
     // creates array of staff members to pull for pool from the pull_pool for the given date
     let lazies = []
@@ -1268,8 +1601,6 @@ function fill_pool(date) {
     date.pull_pool = non_lifeguard_lazies;
     // sets the given dates pool property to staff members assigned to tablesetters
     date.pool = pool_workers;
-    // string representing given day's dayNum, corrected for position on filth table
-    let str_day_number = date.dayNumber + 1;
     
     if (no_lg == 0) {
         // adds the staff members assigned to kitchen for the given day to the filth table
@@ -1302,6 +1633,12 @@ function fill_pool(date) {
 
 // fills out who is undutied for each session day
 function fill_unassigned() {
+    document.getElementById("0, 4").style.backgroundColor = "lightgrey";
+    document.getElementById("0, 5").style.backgroundColor = "lightgrey";
+    document.getElementById("0, 6").style.backgroundColor = "lightgrey";
+    document.getElementById("0, 7").style.backgroundColor = "lightgrey";
+    document.getElementById("0, 8").style.backgroundColor = "lightgrey";
+    document.getElementById("0, 9").style.backgroundColor = "lightgrey";
     for (let i = 1; i < 12; i++) {
         if (i == 7) {
             continue;
@@ -1320,7 +1657,6 @@ function fill_unassigneds(date) {
 
     let len = date.pull_pool.length;
 
-    document.getElementById("0, 4").style.backgroundColor = "lightgrey";
     for (let n = 4; n < 10; n++) {
         document.getElementById(stringDayId + ", " + n).style.backgroundColor = "lightgrey";
     }
